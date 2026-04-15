@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    background-color: #F5F0E8;
+    color: #1C1A15;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    text-align: left;
+    border: none;
+    min-height: 100svh;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Cormorant Garamond', serif;
+    margin: 0;
+  }
+
+  p { margin: 0; }
+
+  select { background-image: none; }
+}
+
+@layer components {
+  .card {
+    @apply bg-bone-dark border border-brass/20 p-5;
+  }
+
+  .card-brass-top {
+    @apply bg-bone-dark border border-brass/20 border-t-2 border-t-brass p-5;
+  }
+
+  .btn-brass {
+    @apply bg-brass text-near-black font-medium px-5 py-2 text-sm tracking-wide hover:bg-brass-dark transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-outline {
+    @apply border border-brass text-brass font-medium px-5 py-2 text-sm tracking-wide hover:bg-brass/10 transition-colors duration-150 cursor-pointer bg-transparent;
+  }
+
+  .input-field {
+    @apply w-full bg-bone border border-brass/30 text-near-black text-sm px-3 py-2 focus:outline-none focus:border-brass transition-colors duration-150 placeholder-near-black/30;
+  }
+
+  .select-field {
+    @apply w-full bg-bone border border-brass/30 text-near-black text-sm px-3 py-2 focus:outline-none focus:border-brass transition-colors duration-150 cursor-pointer;
+  }
+
+  .section-title {
+    @apply font-cormorant text-3xl font-semibold text-near-black tracking-wide;
+  }
+
+  .page-description {
+    @apply text-sm text-near-black/55 mt-1;
+  }
+
+  .brass-divider {
+    @apply border-t border-brass/20 my-6;
+  }
+
+  .badge-scale {
+    @apply inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 border border-green-200;
+  }
+
+  .badge-pause {
+    @apply inline-block px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 border border-red-200;
+  }
+
+  .badge-watch {
+    @apply inline-block px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200;
+  }
+
+  .badge-refresh {
+    @apply inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200;
+  }
+}
