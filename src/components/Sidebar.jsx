@@ -1,6 +1,19 @@
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
+import { readIntelligence } from '../data/sharedIntelligence'
 
 const navItems = [
+  {
+    path: '/brain',
+    label: 'Marketing Brain',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-2.5-2.5v-1a2.5 2.5 0 010-5v-1A2.5 2.5 0 019.5 8 2.5 2.5 0 017 5.5 2.5 2.5 0 019.5 3z" />
+        <path d="M14.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 002.5-2.5v-1a2.5 2.5 0 000-5v-1A2.5 2.5 0 0014.5 8 2.5 2.5 0 0117 5.5 2.5 2.5 0 0014.5 3z" />
+      </svg>
+    ),
+    notify: true,
+  },
   {
     path: '/dashboard',
     label: 'Dashboard',
@@ -14,16 +27,6 @@ const navItems = [
     ),
   },
   {
-    path: '/creative',
-    label: 'Creative Strategist',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9" />
-        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
-      </svg>
-    ),
-  },
-  {
     path: '/seo',
     label: 'SEO Assistant',
     icon: (
@@ -32,16 +35,6 @@ const navItems = [
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
         <line x1="11" y1="8" x2="11" y2="14" />
         <line x1="8" y1="11" x2="14" y2="11" />
-      </svg>
-    ),
-  },
-  {
-    path: '/ads',
-    label: 'Meta Ads Optimiser',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-        <polyline points="16 7 22 7 22 13" />
       </svg>
     ),
   },
@@ -60,6 +53,40 @@ const navItems = [
 ]
 
 export default function Sidebar() {
+  // Show notification dot on Marketing Brain when there are unread checklist tasks
+  // or unread messages from the intelligence layer
+  const [brainNotify, setBrainNotify] = useState(false)
+
+  useEffect(() => {
+    function checkNotify() {
+      // Unread team messages
+      const intel = readIntelligence()
+      const hasUnread = (intel.teamMessages || []).some(
+        (m) => m.from === 'optimiser' && m.to === 'creative' && !m.read
+      )
+      // Unread checklist items (tasks from today that aren't completed)
+      try {
+        const state = JSON.parse(localStorage.getItem('parkview_checklist_state') || '{}')
+        const completedCount = Object.keys(state.ids || {}).length
+        const totalTasks = 6 // MOCK_CHECKLIST_TASKS.length — keep in sync
+        const hasPendingTasks = completedCount < totalTasks
+        setBrainNotify(hasUnread || hasPendingTasks)
+      } catch {
+        setBrainNotify(hasUnread)
+      }
+    }
+
+    checkNotify()
+
+    function handleUpdate() { checkNotify() }
+    window.addEventListener('sharedIntelligenceUpdate', handleUpdate)
+    window.addEventListener('storage', handleUpdate)
+    return () => {
+      window.removeEventListener('sharedIntelligenceUpdate', handleUpdate)
+      window.removeEventListener('storage', handleUpdate)
+    }
+  }, [])
+
   return (
     <aside className="w-64 flex-shrink-0 bg-sidebar border-r border-brass/20 flex flex-col h-full">
       {/* Logo */}
@@ -75,23 +102,29 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-5 space-y-0.5">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              [
-                'flex items-center gap-3 px-3 py-2.5 text-sm font-inter transition-colors duration-150 group',
-                isActive
-                  ? 'border-l-2 border-brass bg-brass/10 text-near-black pl-[10px]'
-                  : 'border-l-2 border-transparent text-near-black/50 hover:text-near-black hover:bg-brass/5 pl-[10px]',
-              ].join(' ')
-            }
-          >
-            <span className="flex-shrink-0">{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {navItems.map((item) => {
+          const showDot = item.notify && brainNotify
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                [
+                  'flex items-center gap-3 px-3 py-2.5 text-sm font-inter transition-colors duration-150 group',
+                  isActive
+                    ? 'border-l-2 border-brass bg-brass/10 text-near-black pl-[10px]'
+                    : 'border-l-2 border-transparent text-near-black/50 hover:text-near-black hover:bg-brass/5 pl-[10px]',
+                ].join(' ')
+              }
+            >
+              <span className="flex-shrink-0">{item.icon}</span>
+              <span className="flex-1">{item.label}</span>
+              {showDot && (
+                <span className="w-2 h-2 rounded-full bg-brass flex-shrink-0" aria-label="New items" />
+              )}
+            </NavLink>
+          )
+        })}
       </nav>
 
       {/* User */}
